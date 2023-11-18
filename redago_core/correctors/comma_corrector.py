@@ -10,10 +10,10 @@ class CommaCorrector:
             "ner",
             MODEL_NAME,
             aggregation_strategy="none",
-            use_auth_token=HUGGINGFACE_TOKEN
+            token=HUGGINGFACE_TOKEN
         )
         self._tokenizer = AutoTokenizer.from_pretrained(
-            MODEL_NAME, use_auth_token=HUGGINGFACE_TOKEN
+            MODEL_NAME, token=HUGGINGFACE_TOKEN
         )
 
     def process_sentence(self, sentence: str) -> list:
