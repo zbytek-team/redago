@@ -74,7 +74,7 @@ function App() {
     <>
       <Box padding="1em" boxShadow="md">
         <Heading size="2xl" color="blue.500">
-          Korekcjoner
+          Redago
         </Heading>
       </Box>
       <Center height="60vh" minHeight="35em" justifyContent="center">
