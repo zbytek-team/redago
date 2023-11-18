@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 import logging
-from corrector_core.comma_corrector import Corrector
+from redago_core.correctors.comma_corrector import CommaCorrector
 
 load_dotenv()
 
@@ -19,7 +19,7 @@ class Tester:
     """
 
     def __init__(self, sentences: list[str] = []):
-        self._corrector = Corrector()
+        self._corrector = CommaCorrector()
         self._sentences = sentences
 
     def split_with_commas(self, sentence: str) -> list[str]:
