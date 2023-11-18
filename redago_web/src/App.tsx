@@ -14,17 +14,28 @@ function App() {
   const [corrected_sentences, setCorrectedSentences] = useState<string>("");
   const [lettersAmount, setLettersAmount] = useState<number>(0);
 
-  const handleCorrect = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    fetch("http://localhost:8000/corrector", {
+  async function postData(url = "", data = {}) {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ text: sentences }),
-    })
-      .then((response) => response.json())
-      .then((data) => setCorrectedSentences(data.corrected_sentences));
+
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  }
+
+  const handleCorrect = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    postData("http://localhost:8000/correct", { text: sentences }).then(
+      (data) => {
+        setCorrectedSentences(data.text);
+      }
+    );
+
+    
   };
 
   const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
