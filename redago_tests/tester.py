@@ -1,13 +1,9 @@
-from dotenv import load_dotenv
-import os
 import logging
 from redago_core.correctors.comma_corrector import CommaCorrector
 
-load_dotenv()
-
 logging.basicConfig(level=logging.INFO)
 
-SAVE_INCORRECT_PREDICTIONS = os.getenv("SAVE_INCORRECT_PREDICTIONS") == "1"
+SAVE_INCORRECT_PREDICTIONS = 1
 
 
 class Tester:
