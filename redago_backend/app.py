@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 from litestar import Litestar, post
-from redago_core.correctors.comma_corrector import CommaCorrector
 from litestar.config.cors import CORSConfig
 from pydantic import BaseModel
+
+from redago_core.corrector import Corrector
+from redago_core.correctors.comma_corrector import CommaCorrector
+from redago_core.correctors.simple_corrector import SimpleCorrector
+
 
 @dataclass
 class TextCorrectionRequest:
@@ -12,12 +16,12 @@ class TextResponse(BaseModel):
     text: str
 
 
-comma_corrector = CommaCorrector()
+corrector = Corrector([CommaCorrector(), SimpleCorrector()])
 
 
 @post("/correct")
 async def correct_text(data: TextCorrectionRequest) -> TextResponse:
-    corrected_text = comma_corrector.correct(data.text)
+    corrected_text = corrector.correct(data.text)
     return TextResponse(text=corrected_text)
 
 
