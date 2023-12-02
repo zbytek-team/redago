@@ -1,6 +1,22 @@
 import { Button, HStack, Textarea, VStack } from "@chakra-ui/react";
+import { useState } from "react";
 
-const InputWindow = () => {
+const InputWindow = ({ handleCorrect }: any) => {
+  const [text, setText] = useState("");
+
+  const MAX_TEXT_LENGTH = 500;
+
+  const handleClear = () => {
+    setText("");
+  };
+
+  const changeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (e.target.value.length > MAX_TEXT_LENGTH) {
+      e.target.value = e.target.value.slice(0, MAX_TEXT_LENGTH);
+    }
+    setText(e.target.value);
+  };
+
   return (
     <VStack alignItems="flex-end">
       <Textarea
@@ -13,9 +29,11 @@ const InputWindow = () => {
           boxShadow: "0 0 0 1px #667EEA",
         }}
         height="8em"
+        value={text}
+        onChange={changeText}
       ></Textarea>
       <HStack>
-        <Button>Wyczyść</Button>
+        <Button onClick={handleClear}>Wyczyść</Button>
 
         <Button
           isDisabled
@@ -25,9 +43,9 @@ const InputWindow = () => {
           _hover={{}}
           w="5em"
         >
-          0/500
+          {text.length}/{MAX_TEXT_LENGTH}
         </Button>
-        <Button>Korekta</Button>
+        <Button onClick={() => handleCorrect(text)}>Korekta</Button>
       </HStack>
     </VStack>
   );
