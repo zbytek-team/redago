@@ -18,6 +18,8 @@ class CommaCorrector(BaseCorrector):
         )
 
     def correct(self, sentence: str) -> str:
+        sentence = sentence.replace(",", " ")
+        sentence = sentence.strip()
         sentence = self._pipe(sentence)
 
         comma_required = False
