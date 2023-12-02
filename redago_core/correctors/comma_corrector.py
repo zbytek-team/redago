@@ -1,10 +1,11 @@
 from transformers import pipeline, AutoTokenizer
+from redago_core.correctors.base_corrector import BaseCorrector
 import os
 
 HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
-class CommaCorrector:
+class CommaCorrector(BaseCorrector):
     def __init__(self):
         self._pipe = pipeline(
             "ner",
@@ -15,9 +16,6 @@ class CommaCorrector:
         self._tokenizer = AutoTokenizer.from_pretrained(
             MODEL_NAME, token=HUGGINGFACE_TOKEN
         )
-
-    def process_sentence(self, sentence: str) -> list:
-        return self._pipe(sentence)
 
     def correct(self, sentence: str) -> str:
         sentence = self._pipe(sentence)
