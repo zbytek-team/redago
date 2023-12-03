@@ -5,13 +5,11 @@ import os
 HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
+
 class CommaCorrector(BaseCorrector):
     def __init__(self):
         self._pipe = pipeline(
-            "ner",
-            MODEL_NAME,
-            aggregation_strategy="none",
-            token=HUGGINGFACE_TOKEN
+            "ner", MODEL_NAME, aggregation_strategy="none", token=HUGGINGFACE_TOKEN
         )
         self._tokenizer = AutoTokenizer.from_pretrained(
             MODEL_NAME, token=HUGGINGFACE_TOKEN

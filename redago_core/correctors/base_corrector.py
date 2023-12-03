@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class BaseCorrector(ABC):
     """Abstract base class for all correctors.
 

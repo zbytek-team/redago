@@ -1,5 +1,6 @@
 from redago_core.correctors.base_corrector import BaseCorrector
 
+
 class Corrector:
     def __init__(self, correctors: list[BaseCorrector]):
         self.correctors = correctors
@@ -9,4 +10,3 @@ class Corrector:
             text = corrector.correct(text)
 
         return text
-        
