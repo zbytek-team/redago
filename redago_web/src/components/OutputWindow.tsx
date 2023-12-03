@@ -8,11 +8,12 @@ interface ResponseWord {
 }
 
 const tooltipDict: { [key: string]: string } = {
-  case: "Zdanie powinno zaczynać się z dużej litery.",
-  comma: "Wstawienie przecinka.",
-  nocomma: "Usunięcie zbędnego przecinka.",
-  period: "Wstawienie kropki na końcu zdania.",
-  ortography: "Błąd ortograficzny albo literówka.",
+  case_changed: "Zdanie powinno zaczynać się z dużej litery.",
+  comma_inserted: "Wstawienie przecinka.",
+  comma_removed: "Usunięcie zbędnego przecinka.",
+  period_inserted: "Wstawienie kropki na końcu zdania.",
+  period_removed: "Usunięcie zbędnej kropki.",
+  spelling_changed: "Błąd ortograficzny albo literówka.",
 };
 
 interface OutputWindowProps {
@@ -24,6 +25,8 @@ const OutputWindow: React.FC<OutputWindowProps> = ({ responseText }) => {
 
   const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    const text = responseText.map((word) => word.corrected).join(" ");
+    navigator.clipboard.writeText(text);
     setCopied(true);
 
     setTimeout(() => {
