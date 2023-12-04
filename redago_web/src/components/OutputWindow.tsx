@@ -1,5 +1,5 @@
 import { Box, Button, HStack, Tooltip, VStack } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface ResponseWord {
   text: string;
