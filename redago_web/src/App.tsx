@@ -16,9 +16,15 @@ const App = () => {
   const [responseText, setResponseText] = useState([] as ResponseWord[]);
 
   const handleCorrect = (text: string) => {
-    Correct(text).then((res) => {
-      setResponseText(res.data.tokenized_text);
-    });
+    Correct(text)
+      .then((response) => {
+        if (response.status === 201) {
+          setResponseText(response.data.tokenized_text);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return (
