@@ -11,4 +11,5 @@ def count_lines_in_dir(dir_path):
 
 
 if __name__ == "__main__":
-    print(count_lines_in_dir("books"))
+    print(f"Total files in books: {len(os.listdir('books'))}")
+    print(f"Total lines in books: {count_lines_in_dir('books')}")
