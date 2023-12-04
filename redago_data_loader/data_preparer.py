@@ -40,4 +40,7 @@ class DataPreparer:
         # remove lines that ends with word which contains dot not as end of sentence
         data = [line for line in data if "." not in line.split(" ")[-1][:-1]]
 
+        # strip whitespaces
+        data = [line.strip() for line in data]
+
         return "\n".join(data)
