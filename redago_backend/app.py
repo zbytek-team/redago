@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from litestar import Litestar, post
+from litestar import Litestar, post, get
 from litestar.config.cors import CORSConfig
 from pydantic import BaseModel
 
 from redago_core.corrector import Corrector
 from redago_core.correctors.comma_corrector import CommaCorrector
 from redago_core.correctors.simple_corrector import SimpleCorrector
-import utils
+from redago_backend import utils
 
 
 @dataclass
@@ -23,6 +23,11 @@ class TokenizedTextResponse(BaseModel):
 
 
 corrector = Corrector([CommaCorrector(), SimpleCorrector()])
+
+
+@get("/")
+async def index() -> TextResponse:
+    return TextResponse(text="Redago backend")
 
 
 @post("/correct")
