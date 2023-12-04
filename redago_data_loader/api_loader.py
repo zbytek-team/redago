@@ -27,6 +27,13 @@ class WolneLekturyAPILoader:
                 break
 
             book_details = requests.get(book["href"]).json()
+
+            if book_details["language"] != "pol":
+                logging.warning(
+                    f"Book {book_details['txt'].split('/')[-1]} is not in polish"
+                )
+                continue
+
             book_url = book_details["txt"]
             book_name = f"{book_details['txt'].split('/')[-1]}"
 
