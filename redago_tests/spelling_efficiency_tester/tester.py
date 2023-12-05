@@ -44,15 +44,15 @@ class Tester:
         """
 
         # split sentences into words
-        corrected_sentence = self.split_sentence(corrected_sentence)
         original_sentence = self.split_sentence(original_sentence)
         error_sentence = self.split_sentence(error_sentence)
+        corrected_sentence = self.split_sentence(corrected_sentence)
 
         # create dict for points
         # true positive - word was errored and corrected
-        # false positive - word was errored but not corrected
-        # false negative - word was not errored but corrected
-        points: dir[str, int] = {"true positive": 0, "false positive": 0, "false negative": 0}
+        # false negative - word was errored but not corrected
+        # false positive - word was not errored but corrected
+        points: dir[str, int] = {"true positive": 0, "true negative": 0, "false positive": 0, "false negative": 0}
 
         # iterate through both documents
         for correct_word, original_word, error_word in zip(
@@ -61,16 +61,18 @@ class Tester:
             # if word was errored
             if error_word != original_word:
                 # if word was corrected
-                if correct_word != original_word:
+                if correct_word == original_word:
                     points["true positive"] += 1
                 # if word was not corrected
                 else:
-                    points["false positive"] += 1
+                    points["false negative"] += 1
             # if word was not errored
             else:
                 # if word was corrected
                 if correct_word != original_word:
-                    points["false negative"] += 1
+                    points["false positive"] += 1
+                else:
+                    points["true negative"] += 1
         
 
         if SAVE_INCORRECT_PREDICTIONS and (
@@ -84,13 +86,14 @@ class Tester:
         """
         Rates correctness of corrected sentences.
         """
-        points: dict[str, int] = {"true positive": 0, "false positive": 0, "false negative": 0}
+        points: dir[str, int] = {"true positive": 0, "true negative": 0, "false positive": 0, "false negative": 0}
 
         for corrected_sentence, original_sentence, error_sentence in zip(
             corrected_sentences, original_sentences, error_sentences
         ):
             result = self._rate_sentence(corrected_sentence, original_sentence, error_sentence)
             points["true positive"] += result["true positive"]
+            points["true negative"] += result["true negative"]
             points["false positive"] += result["false positive"]
             points["false negative"] += result["false negative"]
 
