@@ -8,11 +8,29 @@ ORT_MODEL_NAME = os.getenv("ORT_MODEL_NAME")
 
 class OrtCorrector(BaseCorrector):
     def __init__(self):
-        tokenizer_test = MT5Tokenizer.from_pretrained("google/mt5-small", legacy=False)
-        model_test = TFMT5ForConditionalGeneration.from_pretrained( ORT_MODEL_NAME, token=HUGGINGFACE_TOKEN)
-
-        self._pipe = pipeline("text2text-generation", model=model_test, tokenizer=tokenizer_test, max_length=512)
+        self.tokenizer = MT5Tokenizer.from_pretrained("google/mt5-small", legacy=False)
+        self.model = TFMT5ForConditionalGeneration.from_pretrained(ORT_MODEL_NAME, token=HUGGINGFACE_TOKEN)
 
     def correct(self, text: str) -> str:
-        text = "<ort> " + text
-        return self._pipe(text)[0]["generated_text"]
+        # split sentence by .
+        sentences = text.split(".")
+        # add <ort> to each sentence
+        if text[-1] == ".":
+            sentences = ["<ort> " + s + "." for s in sentences[:-1]]
+        else:
+            sentences = ["<ort> " + s for s in sentences]
+
+        # encode sentences
+        encoded = self.tokenizer(sentences, return_tensors="tf", padding=True)
+
+        # generate
+        outputs = self.model.generate(
+            input_ids=encoded["input_ids"],
+            attention_mask=encoded["attention_mask"],
+            max_length=500
+        )
+
+        # decode
+        decoded = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
+        return " ".join(decoded)

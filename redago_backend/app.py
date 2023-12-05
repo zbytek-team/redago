@@ -23,7 +23,7 @@ class TokenizedTextResponse(BaseModel):
     tokenized_text: list
 
 
-corrector = Corrector([SimpleCorrector(), CommaCorrector()])
+corrector = Corrector([SimpleCorrector(), OrtCorrector(), CommaCorrector()])
 
 
 @get("/")

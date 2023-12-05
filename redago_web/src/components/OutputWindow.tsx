@@ -48,7 +48,7 @@ const OutputWindow: React.FC<OutputWindowProps> = ({ responseText, isLoading }) 
         cursor="auto"
         _disabled={{}}
         _hover={{}}
-        height="8em"
+        height="12em"
         overflow="auto"
       >
         {isLoading && (
