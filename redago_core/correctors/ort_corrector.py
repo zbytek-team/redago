@@ -6,7 +6,7 @@ HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
 ORT_MODEL_NAME = os.getenv("MODEL_NAME")
 
 
-class CommaCorrector(BaseCorrector):
+class OrtCorrector(BaseCorrector):
     def __init__(self):
         tokenizer_test = MT5Tokenizer.from_pretrained("google/mt5-small", legacy=False)
         model_test = TFMT5ForConditionalGeneration.from_pretrained( ORT_MODEL_NAME, token=HUGGINGFACE_TOKEN)
