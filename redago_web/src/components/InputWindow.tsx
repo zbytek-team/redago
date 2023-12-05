@@ -28,7 +28,7 @@ const InputWindow = ({ handleCorrect }: any) => {
         _focus={{
           boxShadow: "0 0 0 1px #667EEA",
         }}
-        height="8em"
+        height="12em"
         value={text}
         onChange={changeText}
       ></Textarea>
