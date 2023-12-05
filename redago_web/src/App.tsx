@@ -14,12 +14,15 @@ type ResponseWord = {
 
 const App = () => {
   const [responseText, setResponseText] = useState([] as ResponseWord[]);
+  const [loading, setLoading] = useState(false);
 
   const handleCorrect = (text: string) => {
+    setLoading(true);
     Correct(text)
       .then((response) => {
         if (response.status === 201) {
           setResponseText(response.data.tokenized_text);
+          setLoading(false);
         }
       })
       .catch((error) => {
@@ -43,7 +46,7 @@ const App = () => {
         gap="20px"
       >
         <InputWindow handleCorrect={handleCorrect} />
-        <OutputWindow responseText={responseText} />
+        <OutputWindow responseText={responseText} isLoading={loading} />
       </Flex>
     </Flex>
   );

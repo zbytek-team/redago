@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Tooltip, VStack } from "@chakra-ui/react";
+import { Box, Button, Center, HStack, Spinner, Tooltip, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
 interface ResponseWord {
@@ -18,9 +18,10 @@ const tooltipDict: { [key: string]: string } = {
 
 interface OutputWindowProps {
   responseText: ResponseWord[];
+  isLoading: boolean
 }
 
-const OutputWindow: React.FC<OutputWindowProps> = ({ responseText }) => {
+const OutputWindow: React.FC<OutputWindowProps> = ({ responseText, isLoading }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -48,8 +49,26 @@ const OutputWindow: React.FC<OutputWindowProps> = ({ responseText }) => {
         _disabled={{}}
         _hover={{}}
         height="8em"
+        overflow="auto"
       >
-        {responseText.map((word) => {
+        {isLoading && (
+          <Box
+            position="relative"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%)"
+          >
+            <Center>
+              <Spinner
+              thickness='4px'
+              speed='0.65s'
+              emptyColor='gray.200'
+              color='blue.500'
+              size='xl' />
+            </Center>
+          </Box>
+        )}
+        {!isLoading && responseText.map((word) => {
           return (
             <>
               {word.reason[0] !== "ok" && (
