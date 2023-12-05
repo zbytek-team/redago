@@ -12,6 +12,6 @@ class Corrector:
         for corrector in self.correctors:
             now = time.time()
             text = corrector.correct(text)
-            logging.info(f"Corrected in {time.time() - now:.2f}s")
+            logging.info(f"{corrector.__class__.__name__} took {time.time() - now} seconds to correct the text")
 
         return text

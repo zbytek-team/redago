@@ -3,7 +3,6 @@ from redago_core.correctors.base_corrector import BaseCorrector
 
 class SimpleCorrector(BaseCorrector):
     def correct(self, text: str) -> str:
-        print(text)
         # if no space after ., ?, ! add it
         if ". " not in text:
             text = text.replace(".", ". ")
