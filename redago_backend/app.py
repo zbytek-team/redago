@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from redago_core.corrector import Corrector
 from redago_core.correctors.comma_corrector import CommaCorrector
 from redago_core.correctors.simple_corrector import SimpleCorrector
+from redago_core.correctors.ort_corrector import OrtCorrector
 from redago_backend import utils
 
 
@@ -22,7 +23,7 @@ class TokenizedTextResponse(BaseModel):
     tokenized_text: list
 
 
-corrector = Corrector([CommaCorrector(), SimpleCorrector()])
+corrector = Corrector([SimpleCorrector(), CommaCorrector()])
 
 
 @get("/")
