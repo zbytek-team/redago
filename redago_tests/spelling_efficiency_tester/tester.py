@@ -120,12 +120,12 @@ class Tester:
 
     def test(self, original_sentences: list[str] = []) -> dict[str, int]:
         # transform sentences to sentences with ortography errors
-        error_sentences = [
+        error_sentences_list = [
             self.errorify(sentence) for sentence in original_sentences
         ]
 
         # join error sentences
-        error_sentences = " ".join(error_sentences)
+        error_sentences = " ".join(error_sentences_list)
 
         # correct sentence and get result
         corrected_sentences = self._corrector.correct(error_sentences)
@@ -140,4 +140,4 @@ class Tester:
             print()
 
         # return rated result in format {'correct': int, 'incorrect': int, 'missing': int}
-        return self._rate(corrected_sentences, original_sentences, error_sentences)
+        return self._rate(corrected_sentences, original_sentences, error_sentences_list)
