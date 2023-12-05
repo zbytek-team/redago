@@ -13,13 +13,9 @@ class OrtCorrector(BaseCorrector):
 
     def correct(self, text: str) -> str:
         # split sentence by .
-        sentences = text.split(".")
-        # add <ort> to each sentence
-        if text[-1] == ".":
-            sentences = ["<ort> " + s + "." for s in sentences[:-1]]
-        else:
-            sentences = ["<ort> " + s for s in sentences]
-
+        sentences = text.replace(". ", ".\n".replace("? ", "?\n")).replace("! ","!\n").split("\n")
+        # to each sentence add prefix
+        sentences = ["<ort> " + sentence for sentence in sentences]
         # encode sentences
         encoded = self.tokenizer(sentences, return_tensors="tf", padding=True)
 

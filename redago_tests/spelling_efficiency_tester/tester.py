@@ -95,6 +95,9 @@ class Tester:
         sentence = sentence.replace("ś", "s")
         sentence = sentence.replace("ź", "z")
         sentence = sentence.replace("ż", "rz")
+        sentence = sentence.replace("j", "i")
+
+        return sentence
 
             
 
@@ -104,10 +107,20 @@ class Tester:
             self.errorify(sentence) for sentence in original_sentences
         ]
 
+        # join error sentences
+        error_sentences = " ".join(error_sentences)
+
         # correct sentence and get result
-        corrected_sentences = [
-            self._corrector.correct(sentence) for sentence in error_sentences
-        ]
+        corrected_sentences = self._corrector.correct(error_sentences)
+        # split by . ? !
+        corrected_sentences = corrected_sentences.replace(". ", ".\n").replace("! ", "!\n").replace("? ", "?\n")
+
+        corrected_sentences = corrected_sentences.split("\n")
+
+        for correct, original in zip(corrected_sentences, original_sentences):
+            print(f"ORIGINAL: {original}")
+            print(f"CORRECTED: {correct}")
+            print()
 
         # return rated result in format {'correct': int, 'incorrect': int, 'missing': int}
         return self._rate(corrected_sentences, original_sentences)
