@@ -1,97 +1,139 @@
 # Redago
 
-This repository houses components for the Redago application, an AI-driven tool for language correction in Polish texts.
+**Polish spelling, punctuation and capitalisation correction — and, unusually
+for a grammar checker, an explanation of every change it makes.**
 
-## Structure
+Polish is a hard target for automated correction: rich inflection, free word
+order, and comma rules that depend on clause structure rather than on any
+surface cue. Redago attacks it with a short pipeline of specialised correctors
+rather than one large model, and exposes the result as a web app that shows the
+user *what* changed and *why*.
 
-The repository is organized into the following components:
+---
 
-### `redago_backend`
+## How it works
 
-The `redago_backend` directory contains the backend application built using LiteStar, responsible for handling user requests and utilizing `redago_core` for text corrections.
+Text passes through a chain of correctors, each responsible for one class of
+error. Each stage is a `BaseCorrector` with a single `correct(text) -> str`
+method, so the chain is a list and the order is a configuration choice:
 
-### `redago_core`
+```
+raw text  →  SimpleCorrector  →  OrtCorrector  →  CommaCorrector  →  corrected text
+              rules             mT5 seq2seq       token classification
+```
 
-The `redago_core` directory houses the core functionality responsible for text correction, language processing, and AI models.
+| Stage | Approach | What it fixes |
+| --- | --- | --- |
+| `SimpleCorrector` | deterministic rules | sentence segmentation, capitalisation after a full stop, missing terminal punctuation, spacing |
+| `OrtCorrector` | fine-tuned **mT5**, run as sequence-to-sequence with an `<ort>` task prefix | spelling and orthography, sentence by sentence |
+| `CommaCorrector` | fine-tuned **BERT** used as a **token classifier** | comma placement |
 
-### `redago_data_loader`
+The comma stage is the interesting one. Instead of asking a generative model to
+rewrite the sentence and hoping it does not change anything else, it strips
+every existing comma and then labels each token with "a comma follows / does
+not follow" — punctuation restoration as sequence labelling. The model can only
+insert commas, so it cannot silently corrupt the rest of the text, and its
+output is directly auditable.
 
-The `redago_data_loader` directory includes functionality for fetching books from the `wolnelektury.pl` API and preparing them for processing by the AI model.
+Splitting the work this way also means the cheap deterministic fixes never
+reach a model at all, and each stage can be retrained, benchmarked and swapped
+independently.
 
-### `redago_model`
+---
 
-The `redago_model` directory encompasses the model training functionality, utilizing advanced AI models like BERT for text correction and language enhancement.
+## Explaining the corrections
 
-### `redago_tests`
+`POST /correct-with-reason` aligns the input with the output word by word and
+labels every difference, so the frontend can highlight each change with its
+cause instead of presenting an opaque rewrite:
 
-The `redago_tests` directory contains various tests, including efficiency and accuracy tests for the correction process.
+```jsonc
+{
+  "tokenized_text": [
+    { "text": "poszedłem",  "corrected": "Poszedłem",  "reason": ["case_changed"] },
+    { "text": "do",         "corrected": "do",         "reason": ["ok"] },
+    { "text": "sklepu",     "corrected": "sklepu,",    "reason": ["comma_inserted"] },
+    { "text": "ktury",      "corrected": "który",      "reason": ["spelling_changed"] }
+  ]
+}
+```
 
-### `redago_web_app`
+Recognised reasons: `case_changed`, `comma_inserted`, `comma_removed`,
+`period_inserted`, `period_removed`, `spelling_changed`, `ok`.
 
-The `redago_web_app` directory hosts the frontend application, developed using React, enabling users to send text correction requests.
+`POST /correct` returns just the corrected string when the explanation is not
+needed.
 
-## Getting Started
+---
 
-Install dependencies by running `pip install -r requirements.txt`.
+## Repository layout
 
-### Running model tools
+```
+redago_core/          the correction pipeline: BaseCorrector, the three correctors, the chain
+redago_backend/       Litestar API - /correct, /correct-with-reason, the diff-and-label logic
+redago_web/           React + TypeScript + Vite + Chakra UI client
+redago_model/         training code: comma_model (token classification), ort_model (mT5)
+redago_data_loader/   builds the training corpus from the Wolne Lektury public-domain book API
+redago_tests/         accuracy harnesses for the comma and spelling correctors
+```
 
-1. **Data Loader Setup**:
-   - Navigate to the `redago_data_loader` directory.
-   - Fetch books by running `python3 api_loader.py`.
+### Building the corpus
 
-2. **Comma Model Setup**:
-   - Navigate to the `redago_model/comma-model` directory.
-   - Train model with `python3 data.py <input_dir> [output_dir]`.
-   - Save model on `https://huggingface.co/`.
+`redago_data_loader` pulls public-domain Polish literature from the
+[Wolne Lektury](https://wolnelektury.pl) API, filtered by genre, and prepares
+it for training. For the comma model that means taking correctly punctuated
+sentences, removing the commas, and keeping the original as the label — the
+corpus supervises itself, so no manual annotation was needed.
 
-3. **Efficiency Tester Setup**:
-   - Navigate to the `redago_tests/efficiency_tester` directory.
-   - Test efficiency by running `python3 main.py`.
+### Measuring it
 
-**Setting Environment Variables**:
-   - Create a `.env` file in the root directory of the project.
-   - Define the following variables inside the `.env` file:
-     ```
-     HUGGINGFACE_TOKEN=<token>
-     MODEL_NAME=<model-name>
-     PYTHONPATH=<project-path>
-     ```
-   - Load these variables in your terminal:
-     ```
-     set -a
-     source .env
-     set +a
-     ```
-   - Ensure these variables are properly set before running any scripts or components within the Redago project.
+`redago_tests` holds two harnesses that take correctly written sentences,
+damage them in the specific way a corrector is supposed to repair, and check
+whether the model restores the original. Sentences the model gets wrong are
+written out for inspection, which is how the failure cases were found.
 
-### Running app locally
+---
 
-1. **Backend Setup**:
-   - Navigate to the `redago_backend` directory.
-   - Start the backend server with `python3 run.py`.
+## Running it
 
-2. **Frontend Setup**:
-   - Go to the `redago_web_app` directory.
-   - Install dependencies using `npm install`.
-   - Launch the frontend app with `npm run dev`.
+```sh
+export HUGGINGFACE_TOKEN=...   # access to the fine-tuned models
+export MODEL_NAME=...          # comma model on the Hugging Face Hub
+export ORT_MODEL_NAME=...      # orthography model on the Hugging Face Hub
 
-3. **Usage**:
-   - Access the frontend at `http://localhost:5173`.
-   - Send text correction requests via the frontend, which will be handled by the backend utilizing the `redago_core` functionalities.
+docker compose up --build      # API on :31416, web client on :80
+```
 
-## Dockerization
+Without Docker:
 
-Both the backend and frontend applications can be Dockerized for easy deployment. Refer to individual directories for Dockerfile configurations.
+```sh
+pip install -r requirements.txt
+PYTHONPATH=. litestar --app redago_backend.app:app run     # API
+cd redago_web && yarn && yarn dev                          # client
+```
 
-To Dockerize the backend:
-1. Use `docker-compose up -d` to build and start all services defined in the `docker-compose.yml` file.
-2. Access the application at appropriate ports mapped in the `docker-compose.yml` file.
+Retraining, corpus building and the accuracy harnesses are separate entry
+points:
 
-## Contributing
+```sh
+python redago_data_loader/api_loader.py                    # fetch and prepare books
+python redago_model/comma_model/data.py <input> [output]   # build the comma dataset
+python redago_model/comma_model/train-model.py             # fine-tune the comma model
+python redago_tests/comma_efficiency_tester/main.py        # measure comma accuracy
+```
 
-Feel free to contribute to Redago by opening issues or submitting pull requests. We welcome any improvements or bug fixes!
+---
 
-## License
+## Stack
 
-This project is licensed under the [MIT License](LICENSE).
+Python 3, PyTorch and Hugging Face Transformers for the comma model,
+TensorFlow for the mT5 orthography model, `datasets` and scikit-learn for
+training, Litestar and uvicorn for the API, React 18 with TypeScript, Vite and
+Chakra UI for the client, Docker Compose for the whole thing.
+
+## Authors
+
+Built by **Marcin** ([@ack2406](https://github.com/ack2406)) — the
+correction pipeline and correctors, the training pipeline, the corpus loader,
+the Litestar API and the accuracy harnesses — with
+**Maciej** ([@Birband](https://github.com/Birband)).
